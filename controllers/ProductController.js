@@ -1,81 +1,97 @@
 const Product = require('./../models/productModel');
 const path = require('path');
-exports.getAllProducts = async (req,res) => {
-    try{
-        const products = await Product.find();
-        //code to render all the products in the webpage
-        res.status(200).json({
-            products
-        })
-    }
-    catch(err)
-    {
-        console.log(err);
-    }
-}
-exports.CreateProduct = async (req,res) => {
-    try 
-    {
-        const product = await Product.create(req.body);
+const { setFlagsFromString } = require('v8');
+
+const APIfeatures = require('./../utils/APIfeatures');
+const catchAsync = require('./../utils/catchAsync');
+const Apperror = require('../utils/Apperror');
+
+exports.getAllProducts = catchAsync(async (req,res,next) => {
+    const features = new APIfeatures(Product.find(),req.query)
+    .filter()
+    .sorting()
+    .paginate()
+    .limitFields();
+
+//console.log(features);
+const data = await features.query;
+res.status(200).json({
+    data
+});
+});
+exports.CreateProduct = catchAsync(async (req,res,next) => {
+    const product = await Product.create(req.body);
         //this product variable would be used while rendering json data and webpage
         //code to render the website with newly created product
         res.status(200).json({
             product
-        })
-    } catch(err) {
-        console.log(err);
-    }
-    
-}
-exports.getProduct = async (req,res) => {
-    try{
-        console.log(req.params.id);
-        var product;
-        Product.findById(req.params.id, function(err, docs){
-            if(err)
-            {
-                console.log(err);
-            }
-            else
-            {
-                product = docs;
-            }
+        }); 
+});
+exports.getProduct = catchAsync(async (req,res,next) => {
+        var product = await Product.findById(req.params.id);
+        console.log(product);
+        if(product==null) //!null = true
+        {
+           return next(new Apperror('No tour found with that ID', 404)); //we have used return here so that the tour does not return two responses
+            //two responses here will be 
+            //1. the error response
+           //2. the null value response if we do not use return
+       }
             res.status(200).json({
                 product
             })
         });
-      //  console.log(products);
-        //code to render single product in a dedicated webpage
-      //  res.status(200).json({
-          //  product
-        //});
-    }
-    catch(err)
-    {
-       // console.log(err);
-    }
-}
-exports.UpdateProduct = async (req,res) => {
-    try{
+    
+
+exports.UpdateProduct = catchAsync(async (req,res,next) => {
         const product = await Product.findByIdAndUpdate(req.params.id,req.body, {
-            new: true
+            new: true,
+            runValidators: true
         });
+        if(product==null) //!null = true
+        {
+           return next(new Apperror('No tour found with that ID', 404)); //we have used return here so that the tour does not return two responses
+            //two responses here will be 
+            //1. the error response
+           //2. the null value response if we do not use return
+       }
         res.status(200).json({
             product
         })
-    }
-    catch(err)
-    {
-        console.log(err);
-    }
-}
-exports.DeleteProduct = async (req,res) => {
-    try{
-        await Product.findByIdAndDelete(req.params.id);
-        res.send('deleted');
-    }
-    catch(err)
-    {
-        console.log(err);
-    }
-}
+    });
+exports.DeleteProduct = catchAsync(async (req,res,next) => {
+        const product = await Product.findByIdAndDelete(req.params.id);
+        if(product==null) //!null = true
+        {
+           return next(new Apperror('No tour found with that ID', 404)); //we have used return here so that the tour does not return two responses
+            //two responses here will be 
+            //1. the error response
+           //2. the null value response if we do not use return
+       }
+       res.send('deleted');
+});
+
+exports.getProductStats = catchAsync(async (req,res,next) => {
+        const stats = await Product.aggregate([
+            {
+                $match: { ratingsAverage: {$gte: 4.5}}
+            },
+            {
+                $group: {
+                    _id:null,
+                    num: {$sum: 1},
+                    numratings: {$sum: '$ratingsAverage'},
+                    avgrating: {$avg: '$ratingsAverage'},
+                    avgprice: {$avg: '$Price'},
+                    minprice: {$min: '$Price'},
+                    maxprice: {$max: '$Price'}
+                }
+            },
+            {
+                $sort: {avgprice: 1}
+            }
+        ]);
+        res.status(200).json({
+            stats
+        })
+    });
