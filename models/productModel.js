@@ -11,7 +11,7 @@ mongoose.connect("mongodb://localhost:27017/Ecommerce",{
 const ProductSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        required: true,
     },
     processor: {
         type: String,
@@ -32,6 +32,38 @@ const ProductSchema = new mongoose.Schema({
     Price: {
         type: Number,
         required: true
+    },
+    ratingsAverage: {
+        type: Number,
+        default: 4.5,
+        min: [1, 'cannot be less than 1'],
+        max: 5
+    },
+    ratingsQuantity: {
+        type: Number,
+        default: 0
+    },
+    priceDiscount: {
+        type: Number,
+        default: 0
+    },
+    Summary: {
+        type: String,
+        trim: true,
+        required : true
+    },
+    description: {
+        type: String,
+        trim: true
+    },
+    ImageCover: {
+        type: String,
+        required: true
+    },
+    images: [String],
+    createdAt: {
+        type: Date,
+        default: Date.now()
     }
 });
 
