@@ -5,13 +5,24 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "debug": "ndb server.js"
   },
   "author": "Himanshu Sanecha",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "express": "^4.17.1",
+    "express-mongo-sanitize": "^2.0.2",
+    "express-rate-limit": "^5.2.6",
+    "helmet": "^4.4.1",
+    "hpp": "^0.2.3",
+    "jsonwebtoken": "^8.5.1",
     "morgan": "^1.10.0",
-    "nodemon": "^2.0.7"
+    "ndb": "^1.1.5",
+    "nodemailer": "^6.5.0",
+    "nodemon": "^2.0.7",
+    "validator": "^13.5.2",
+    "xss-clean": "^0.1.1"
   }
 }
