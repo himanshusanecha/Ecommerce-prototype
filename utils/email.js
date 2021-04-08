@@ -12,8 +12,8 @@ const sendEmail = async options => {
     const transporter = nodemailer.createTransport({
         service: 'Gmail', //specify the service that you want to use for sending emails
         auth: { // authentication 
-            user: 'ekart179@gmail.com', //specify the user email that is the email through which you want to send email
-            pass: 'ekarthelloworld@gmail.com' //password of the user email that will be used to send the emails
+            user: '', //specify the user email that is the email through which you want to send email
+            pass: '' //password of the user email that will be used to send the emails
         }
         //activate in gmail "less secure app" option
     })
